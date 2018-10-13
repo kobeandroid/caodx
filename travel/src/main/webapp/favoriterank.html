@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>收藏排行榜</title>
+        <link rel="stylesheet" type="text/css" href="css/common.css">
+        <link rel="stylesheet" type="text/css" href="css/ranking-list.css">
+        <script src="js/jquery-3.3.1.js"></script>
+        <script>
+            $(function () {
+                $("#sousuo").click(function () {
+                    var rname = $("#xianlu").val();
+                    var hp = $("#h").val();
+                    var dp = $("#d").val();
+                   load(rname,hp,dp);
+                });
+                load();
+            });
+       function load(currentPage,rname,hp,dp) {
+           $.get("route/favoriteAll",{currentPage:currentPage,rname:rname,hp:hp,dp:dp},function (pb) {
+
+               // 页码展示
+               var lis = "";
+               var fristPage = '<li onclick="javascipt:load('+1+')"><a href="javascript:void(0)">首页</a></li>';
+
+               //计算上一页的页码
+               var beforeNum =  pb.currentPage - 1;
+               if(beforeNum <= 0){
+                   beforeNum = 1;
+               }
+
+               var beforePage = '<li  onclick="javascipt:load('+beforeNum+')" class="threeword"><a href="javascript:void(0)">上一页</a></li>';
+
+               lis += fristPage;
+               lis += beforePage;
+
+
+               var begin;
+               var end;
+
+               if (pb.totalPage<10){
+                   begin=1;
+                   end=pb.totalPage;
+               }else {
+                   begin=pb.currentPage-5;
+                   end=pb.currentPage+4;
+                   if (begin<1){
+                       begin=1;
+                       end=begin+9;
+                   }
+                   if (end>pb.totalPage){
+                       end=pb.totalPage;
+                       begin = end-9;
+                   }
+               }
+
+
+               for(var i = begin; i <= end; i++) {
+                   var li;
+                   if (i==pb.currentPage){
+                       li="<li class='curPage' name='curPage'><a href='javascript:load("+i+")'>"+i+"</a></li>"
+                   }else {
+
+                       li="<li name='curPage'><a href='javascript:load("+i+")'>"+i+"</a></li>"
+                   }
+                   lis += li;
+               }
+               var lastPage = '<li onclick="javascipt:load('+pb.totalPage+')"><a href="javascript:void(0)">末页</a></li>';
+
+               //计算下一页的页码
+               var xiaNum =  pb.currentPage + 1;
+               if(xiaNum >= pb.totalPage){
+                   xiaNum = pb.totalPage;
+               }
+               var nextPage = '<li onclick="javascipt:load('+xiaNum+')" class="threeword"><a href="javascript:void(0)">下一页</a></li>';
+
+               lis += nextPage;
+               lis += lastPage;
+
+               //将lis内容设置到 ul
+               $("#pageNum").html(lis);
+               // 数据展示
+               var uls = "";
+               for (var i = 0;i<pb.list.length;i++){
+
+                   var r=pb.list[i];
+                   var ul = ' <li>\n' +
+                       '                        <span class="num one">'+(((pb.currentPage-1)*12)+(i+1))+'</span>\n' +
+                       '                            <a href="route_detail.html?rid='+r.rid+'"><img src="'+r.rimage+'" alt=""></a>\n' +
+                       '                            <h4><a href="route_detail.html">'+r.rname+'</a></h4>\n' +
+                       '                        <p>\n' +
+                       '                        <b class="price">&yen;<span>'+r.price+'</span>起</b>\n' +
+                       '                        <span class="shouchang">已收藏'+r.count+'次</span>\n' +
+                       '                            </p>\n' +
+                       '                            </li>'
+                   uls+=ul;
+               }
+               $("#favorite").html(uls);
+           },"json");
+       }
+        </script>
+    </head>
+    <body>
+    <!--引入头部-->
+    <div id="header"></div>
+        <div class="contant">
+            <div class="shaixuan">
+                <span>线路名称</span>
+                <input type="text" id="xianlu">
+                <span>金额</span>
+                <input type="text" id="h">~<input type="text" id="d">
+                <button id="sousuo">搜索</button>
+            </div>
+            <div class="list clearfix">
+                <ul id="favorite">
+
+                </ul>
+            </div>
+            <div class="pageNum">
+                <ul id="pageNum">
+
+                </ul>
+            </div>
+        </div>
+    	
+         <!--导入底部-->
+   		 <div id="footer"></div>
+    <!--导入布局js，共享header和footer-->
+    <script type="text/javascript" src="js/include.js"></script>
+    </body>
+</html>
